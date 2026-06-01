@@ -16,6 +16,7 @@ export type Match = {
   max_players: number;
   round_duration_s: number;
   version: string;
+  is_steam: boolean;
 };
 export type MatchesResponse = { matches: Match[] };
 
@@ -27,6 +28,7 @@ export type MatchOverview = {
   max_players: number;
   round_s: number;
   version: string;
+  is_steam: boolean;
 };
 export type ScoreboardRow = {
   player_id: string;

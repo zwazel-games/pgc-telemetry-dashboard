@@ -12,7 +12,8 @@ const server = setupServer(
   http.get("http://127.0.0.1:8787/versions", () => HttpResponse.json({ data: { versions: ["1.0.0"] }, generated_at: "t" })),
   http.get("http://127.0.0.1:8787/matches",  () => HttpResponse.json({
     data: { matches: [{ match_id: "m1", started_at: "2026-05-01T00:00:00Z", map: "arena_a",
-                        rounds: 5, players: 4, max_players: 8, round_duration_s: 60, version: "1.0.0" }] },
+                        rounds: 5, players: 4, max_players: 8, round_duration_s: 60, version: "1.0.0",
+                        is_steam: true }] },
     generated_at: "t",
   })),
 );

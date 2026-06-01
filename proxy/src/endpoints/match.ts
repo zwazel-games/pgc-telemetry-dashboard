@@ -9,7 +9,8 @@ const CACHE_S = 60;
 const OVERVIEW_SQL = `
 SELECT properties.map_name AS map, properties.total_rounds AS rounds,
        properties.player_count AS players, properties.max_players AS max_players,
-       properties.round_duration_secs AS round_s, properties.game_version AS version
+       properties.round_duration_secs AS round_s, properties.game_version AS version,
+       properties.is_steam AS is_steam
 FROM events
 WHERE event = 'match_started' AND properties.match_id = {match_id}
 LIMIT 1

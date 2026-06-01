@@ -17,7 +17,8 @@ SELECT
     properties.player_count         AS players,
     properties.max_players          AS max_players,
     properties.round_duration_secs  AS round_duration_s,
-    properties.game_version         AS version
+    properties.game_version         AS version,
+    properties.is_steam             AS is_steam
 FROM events
 WHERE event = 'match_started'
   AND timestamp >= toDateTime({since})

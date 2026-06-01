@@ -33,8 +33,8 @@ describe("GET /matches", () => {
       .mockResolvedValueOnce(new Response(JSON.stringify({ results: [["arena_a"]], columns: ["map_name"] })))
       .mockResolvedValueOnce(new Response(JSON.stringify({ results: [["1.0.0"]], columns: ["game_version"] })))
       .mockResolvedValueOnce(new Response(JSON.stringify({
-        results: [["m1", "2026-05-01T00:00:00Z", "arena_a", 5, 4, 8, 60, "1.0.0"]],
-        columns: ["match_id", "started_at", "map", "rounds", "players", "max_players", "round_duration_s", "version"],
+        results: [["m1", "2026-05-01T00:00:00Z", "arena_a", 5, 4, 8, 60, "1.0.0", true]],
+        columns: ["match_id", "started_at", "map", "rounds", "players", "max_players", "round_duration_s", "version", "is_steam"],
       })));
     vi.stubGlobal("fetch", fetchMock);
 
