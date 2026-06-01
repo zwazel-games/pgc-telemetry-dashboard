@@ -10,6 +10,18 @@ describe("router", () => {
     expect(res.headers.get("access-control-allow-origin")).toBe("http://localhost:5173");
   });
 
+  it("OPTIONS picks the matched origin from a comma-separated allowlist", async () => {
+    // wrangler.toml's ALLOWED_ORIGIN is overridden in vitest.config to "http://localhost:5173"
+    // (single value); this test verifies the *router logic* with an explicit Origin header
+    // matching that single entry.
+    const res = await SELF.fetch("https://worker.test/matches", {
+      method: "OPTIONS",
+      headers: { Origin: "http://localhost:5173" },
+    });
+    expect(res.status).toBe(204);
+    expect(res.headers.get("access-control-allow-origin")).toBe("http://localhost:5173");
+  });
+
   it("returns 404 with JSON for unknown path", async () => {
     const res = await SELF.fetch("https://worker.test/nope");
     expect(res.status).toBe(404);

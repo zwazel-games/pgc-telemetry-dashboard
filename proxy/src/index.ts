@@ -20,9 +20,16 @@ const routes: Record<string, Handler> = {
   "/versions": versions.handle,
 };
 
+function pickOrigin(env: Env, req: Request): string {
+  const allowed = env.ALLOWED_ORIGIN.split(",").map((s) => s.trim()).filter(Boolean);
+  const reqOrigin = req.headers.get("Origin");
+  if (reqOrigin && allowed.includes(reqOrigin)) return reqOrigin;
+  return allowed[0] ?? "";
+}
+
 export default {
   async fetch(req: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    const origin = env.ALLOWED_ORIGIN;
+    const origin = pickOrigin(env, req);
 
     if (req.method === "OPTIONS") return preflight(origin);
 
