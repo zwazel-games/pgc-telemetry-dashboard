@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build artifacts
+site/dist/
+proxy/dist/
+proxy/.wrangler/
+**/*.tsbuildinfo
+
+# Env files (kept: .env.production for VITE_API_BASE_URL when applicable)
+.env
+.env.local
+.env.*.local
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Test artifacts
+coverage/
