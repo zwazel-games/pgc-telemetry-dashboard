@@ -21,8 +21,8 @@ FROM (
         ) AS powerup
     FROM events
     WHERE event = 'powerup_picked'
-      AND timestamp >= {since}
-      AND timestamp <  {until}
+      AND timestamp >= toDateTime({since})
+      AND timestamp <  toDateTime({until})
 )
 GROUP BY powerup
 ORDER BY pick_rate DESC

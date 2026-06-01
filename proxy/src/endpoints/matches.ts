@@ -20,8 +20,8 @@ SELECT
     properties.game_version         AS version
 FROM events
 WHERE event = 'match_started'
-  AND timestamp >= {since}
-  AND timestamp <  {until}
+  AND timestamp >= toDateTime({since})
+  AND timestamp <  toDateTime({until})
 `;
 
 export async function handle(req: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
