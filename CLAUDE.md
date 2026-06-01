@@ -2,6 +2,16 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Before you start any task
+
+**Check what's installed and use it.** Before diving in, take stock of available tools — skills, MCP servers, plugins — and reach for the ones that fit the task. Don't reinvent functionality that a tool already provides.
+
+**Serena MCP is mandatory in this repo.**
+- If the Serena MCP server is not available, reachable, or activated for this project: **stop work immediately** and tell the user. Do not proceed with any code changes. Wait for the user to activate or fix Serena.
+- When Serena is available, follow its setup: call its `initial_instructions` tool first, then `list_memories` / `read_memory` to surface any prior context relevant to the task. Past Serena memories are the canonical source of "what was decided", "what burned us", and "what's planned" — read before acting.
+- **All persistent memory writes go through Serena, not through other memory systems.** Serena's memories live under the project (typically `.serena/memories/`) and are committed and pushed to git, so they're shared across machines and agents. Anything saved elsewhere (e.g., the host-local file-based auto-memory under `~/.claude/projects/...`) is invisible to other contributors and other machines — do not use those paths for project memory.
+- Save a memory via Serena when you learn something that another agent on this repo would benefit from knowing: a non-obvious decision, a footgun you hit, a quirk you worked around, a user preference, where an external resource lives. Don't save things derivable from the current code, recent commits, or this CLAUDE.md.
+
 ## Project overview
 
 Live public analytics dashboard over PostHog game telemetry. Two deployed surfaces backed by a single pnpm workspace:
