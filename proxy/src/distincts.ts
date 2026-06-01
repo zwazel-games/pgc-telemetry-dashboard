@@ -12,6 +12,7 @@ SELECT DISTINCT properties.map_name AS map_name
 FROM events
 WHERE event = 'match_started' AND notEmpty(toString(properties.map_name))
 ORDER BY map_name
+LIMIT 500
 `;
 
 const VERSIONS_SQL = `
@@ -19,6 +20,7 @@ SELECT DISTINCT properties.game_version AS game_version
 FROM events
 WHERE event = 'match_started' AND notEmpty(toString(properties.game_version))
 ORDER BY game_version DESC
+LIMIT 500
 `;
 
 export async function getMaps(env: Env): Promise<string[]> {
