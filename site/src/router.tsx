@@ -3,6 +3,7 @@ import { Route as rootRoute } from "./routes/__root.js";
 import { Route as indexRoute } from "./routes/index.js";
 import { Route as matchesRoute } from "./routes/matches.js";
 import { Route as matchDetailRoute } from "./routes/matches.$id.js";
+import { Route as playerRoute } from "./routes/players.$id.js";
 
 const placeholder = (path: string, name: string) =>
   createRoute({
@@ -15,7 +16,7 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   matchesRoute,
   matchDetailRoute,
-  placeholder("/players/$id", "Player history"),
+  playerRoute,
   placeholder("/balance/powerups", "Powerup pick-rate"),
 ]);
 
