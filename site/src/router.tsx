@@ -14,7 +14,13 @@ const routeTree = rootRoute.addChildren([
   powerupsRoute,
 ]);
 
-export const router = createRouter({ routeTree });
+// Vite's import.meta.env.BASE_URL is "/" in dev and "/pgc-telemetry-dashboard/"
+// in the production build (see vite.config.ts). Strip the trailing slash for
+// TanStack Router's basepath, which expects no trailing slash and treats "" /
+// undefined as root.
+const basepath = import.meta.env.BASE_URL.replace(/\/$/, "") || undefined;
+
+export const router = createRouter({ routeTree, basepath });
 
 declare module "@tanstack/react-router" {
   interface Register { router: typeof router; }
