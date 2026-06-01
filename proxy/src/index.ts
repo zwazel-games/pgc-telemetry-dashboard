@@ -2,6 +2,7 @@ import type { Env } from "./env.js";
 import * as matches from "./endpoints/matches.js";
 import * as match from "./endpoints/match.js";
 import * as player from "./endpoints/player.js";
+import * as powerup from "./endpoints/powerup.js";
 import * as powerupPickrate from "./endpoints/powerup-pickrate.js";
 import * as maps from "./endpoints/maps.js";
 import * as versions from "./endpoints/versions.js";
@@ -15,6 +16,7 @@ const routes: Record<string, Handler> = {
   "/matches": matches.handle,
   "/match": match.handle,
   "/player": player.handle,
+  "/powerup": powerup.handle,
   "/powerup-pickrate": powerupPickrate.handle,
   "/maps": maps.handle,
   "/versions": versions.handle,

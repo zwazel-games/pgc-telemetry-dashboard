@@ -4,6 +4,7 @@ import type {
   MatchDetail,
   PlayerHistory,
   PowerupPickrate,
+  PowerupDetail,
   MapsResponse, VersionsResponse,
 } from "@pgc/shared";
 import { apiEnvelope } from "./client.js";
@@ -52,4 +53,12 @@ export const usePowerupPickrate = (range: { since?: string; until?: string }) =>
     queryKey: ["powerup-pickrate", range],
     queryFn: () => apiEnvelope<PowerupPickrate>("/powerup-pickrate", { ...range }),
     staleTime: STALE_MS,
+  });
+
+export const usePowerupDetail = (id: string, range: { since?: string; until?: string }) =>
+  useQuery({
+    queryKey: ["powerup", id, range],
+    queryFn: () => apiEnvelope<PowerupDetail>("/powerup", { id, ...range }),
+    staleTime: STALE_MS,
+    enabled: id.length > 0,
   });

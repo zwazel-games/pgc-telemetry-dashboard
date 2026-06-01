@@ -59,6 +59,32 @@ export type PowerupPickrateRow = {
 };
 export type PowerupPickrate = { rows: PowerupPickrateRow[] };
 
+// /powerup?id=
+export type PowerupKeyStats = {
+  powerup: string;
+  rarity: string | null;
+  times_offered: number;
+  times_picked: number;
+  pick_rate: number;
+};
+export type PowerupCoOfferRow = {
+  other_powerup: string;
+  co_offered: number;
+  times_picked_target: number;
+  times_picked_other: number;
+};
+export type PowerupPlayerRow = {
+  player_id: string;
+  times_offered: number;
+  times_picked: number;
+  pick_rate: number;
+};
+export type PowerupDetail = {
+  stats: PowerupKeyStats;
+  co_offers: PowerupCoOfferRow[];
+  players: PowerupPlayerRow[];
+};
+
 // /maps, /versions
 export type MapsResponse = { maps: string[] };
 export type VersionsResponse = { versions: string[] };

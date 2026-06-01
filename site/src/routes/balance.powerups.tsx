@@ -18,7 +18,8 @@ function PowerupPickratePage() {
   const q = usePowerupPickrate({ since: search.since, until: search.until });
 
   const columns: Column<PowerupPickrateRow>[] = [
-    { key: "powerup",       label: "Powerup",     sortable: true },
+    { key: "powerup",       label: "Powerup",     sortable: true,
+      render: (r) => <span className="text-accent">{r.powerup}</span> },
     { key: "times_offered", label: "Offered",     sortable: true, align: "right" },
     { key: "times_picked",  label: "Picked",      sortable: true, align: "right" },
     { key: "pick_rate",     label: "Pick rate",   sortable: true, align: "right",
@@ -45,6 +46,8 @@ function PowerupPickratePage() {
             columns={columns}
             rows={q.data.data.rows}
             getRowKey={(r) => r.powerup}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            onRowClick={(r) => navigate({ to: "/balance/powerups/$id" as any, params: { id: r.powerup } as any, search: ((prev: unknown) => prev) as any })}
             emptyMessage="No powerup data in selected range."
           />
           <UpdatedAt iso={q.data.generated_at} />
