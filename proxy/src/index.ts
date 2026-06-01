@@ -1,6 +1,7 @@
 import type { Env } from "./env.js";
 import * as matches from "./endpoints/matches.js";
 import * as match from "./endpoints/match.js";
+import * as matchRounds from "./endpoints/match-rounds.js";
 import * as player from "./endpoints/player.js";
 import * as powerup from "./endpoints/powerup.js";
 import * as powerupPickrate from "./endpoints/powerup-pickrate.js";
@@ -15,6 +16,7 @@ type Handler = (req: Request, env: Env, ctx: ExecutionContext) => Promise<Respon
 const routes: Record<string, Handler> = {
   "/matches": matches.handle,
   "/match": match.handle,
+  "/match-rounds": matchRounds.handle,
   "/player": player.handle,
   "/powerup": powerup.handle,
   "/powerup-pickrate": powerupPickrate.handle,

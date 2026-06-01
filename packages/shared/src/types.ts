@@ -37,9 +37,38 @@ export type ScoreboardRow = {
   deaths: number;
   points: number;
 };
+export type PlayerFinalInventory = {
+  player_id: string;
+  powerups: string[]; // all `picked` ids for this player+match, in pick order
+};
 export type MatchDetail = {
   overview: MatchOverview | null;
   scoreboard: ScoreboardRow[];
+  inventories: PlayerFinalInventory[];
+};
+
+// /match-rounds?id=
+export type RoundPlayerSummary = {
+  round: number; // 0-indexed
+  player_id: string;
+  kills: number;
+  deaths: number;
+  points: number;
+  weapon: string;
+  class: string;
+};
+export type PowerupOffer = { id: string; rarity: string };
+export type TierWeight = { tier: string; base_weight: number; final_weight: number };
+export type RoundPowerupPick = {
+  round: number; // 0-indexed; picks fire after each round except the last
+  player_id: string;
+  picked: string; // "" if the player didn't pick
+  offered: PowerupOffer[];
+  tier_weights: TierWeight[];
+};
+export type MatchRounds = {
+  summaries: RoundPlayerSummary[];
+  picks: RoundPowerupPick[];
 };
 
 // /player?id=
