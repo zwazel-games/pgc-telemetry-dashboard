@@ -83,6 +83,10 @@ function MatchDetailPage() {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 navigate({ to: "/players/$id" as any, params: { id: playerId } as any })
               }
+              onViewPowerup={(powerupId) =>
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                navigate({ to: "/balance/powerups/$id" as any, params: { id: powerupId } as any, search: ((p: unknown) => p) as any })
+              }
             />
           )}
           {search.view === "rounds" && (
@@ -91,6 +95,10 @@ function MatchDetailPage() {
               onViewPlayer={(playerId) =>
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 navigate({ to: "/players/$id" as any, params: { id: playerId } as any })
+              }
+              onViewPowerup={(powerupId) =>
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                navigate({ to: "/balance/powerups/$id" as any, params: { id: powerupId } as any, search: ((p: unknown) => p) as any })
               }
             />
           )}
@@ -108,10 +116,12 @@ function ScoreboardView({
   scoreboard,
   inventoryByPlayer,
   onViewPlayer,
+  onViewPowerup,
 }: {
   scoreboard: ScoreboardRow[];
   inventoryByPlayer: Map<string, string[]>;
   onViewPlayer: (playerId: string) => void;
+  onViewPowerup: (powerupId: string) => void;
 }) {
   const columns: Column<ScoreboardRow>[] = [
     { key: "player_id", label: "Player",
@@ -130,6 +140,7 @@ function ScoreboardView({
         <InventoryPanel
           inventory={inventoryByPlayer.get(r.player_id)}
           onViewPlayer={() => onViewPlayer(r.player_id)}
+          onViewPowerup={onViewPowerup}
         />
       )}
       emptyMessage="No player rounds recorded."
@@ -137,23 +148,40 @@ function ScoreboardView({
   );
 }
 
+/** Groups duplicate picks while preserving the first-occurrence order. */
+function groupCounts(items: string[]): { id: string; count: number }[] {
+  const counts = new Map<string, number>();
+  for (const item of items) counts.set(item, (counts.get(item) ?? 0) + 1);
+  return [...counts.entries()].map(([id, count]) => ({ id, count }));
+}
+
 function InventoryPanel({
   inventory,
   onViewPlayer,
+  onViewPowerup,
 }: {
   inventory: string[] | undefined;
   onViewPlayer: () => void;
+  onViewPowerup: (powerupId: string) => void;
 }) {
+  const grouped = inventory ? groupCounts(inventory) : [];
+  const totalPicks = inventory?.length ?? 0;
   return (
     <div className="space-y-3">
       <div>
         <div className="text-muted text-xs uppercase tracking-wide mb-1">
-          Final inventory{inventory && inventory.length > 0 ? ` (${inventory.length})` : ""}
+          Final inventory{totalPicks > 0 ? ` (${totalPicks})` : ""}
         </div>
-        {inventory && inventory.length > 0 ? (
+        {grouped.length > 0 ? (
           <div className="flex flex-wrap gap-2">
-            {inventory.map((p, i) => (
-              <span key={`${p}-${i}`} className="bg-bg border border-border rounded px-2 py-1 text-xs">{p}</span>
+            {grouped.map((g) => (
+              <button
+                key={g.id}
+                onClick={() => onViewPowerup(g.id)}
+                className="bg-bg border border-border rounded px-2 py-1 text-xs hover:border-accent hover:text-accent transition-colors"
+              >
+                {g.id}{g.count > 1 && <span className="text-muted ml-1">×{g.count}</span>}
+              </button>
             ))}
           </div>
         ) : (
@@ -172,9 +200,11 @@ function InventoryPanel({
 function RoundsView({
   q,
   onViewPlayer,
+  onViewPowerup,
 }: {
   q: ReturnType<typeof useMatchRounds>;
   onViewPlayer: (playerId: string) => void;
+  onViewPowerup: (powerupId: string) => void;
 }) {
   // Group summaries and picks by round number.
   const grouped = useMemo(() => {
@@ -195,6 +225,7 @@ function RoundsView({
           summaries={round.summaries}
           pickByPlayer={round.pickByPlayer}
           onViewPlayer={onViewPlayer}
+          onViewPowerup={onViewPowerup}
         />
       ))}
     </div>
@@ -225,11 +256,13 @@ function RoundCard({
   summaries,
   pickByPlayer,
   onViewPlayer,
+  onViewPowerup,
 }: {
   round: number;
   summaries: RoundPlayerSummary[];
   pickByPlayer: Map<string, RoundPowerupPick>;
   onViewPlayer: (playerId: string) => void;
+  onViewPowerup: (powerupId: string) => void;
 }) {
   const columns: Column<RoundPlayerSummary>[] = [
     { key: "player_id", label: "Player",
@@ -262,6 +295,7 @@ function RoundCard({
             <PickPanel
               pick={pickByPlayer.get(r.player_id)}
               onViewPlayer={() => onViewPlayer(r.player_id)}
+              onViewPowerup={onViewPowerup}
             />
           )}
         />
@@ -273,9 +307,11 @@ function RoundCard({
 function PickPanel({
   pick,
   onViewPlayer,
+  onViewPowerup,
 }: {
   pick: RoundPowerupPick | undefined;
   onViewPlayer: () => void;
+  onViewPowerup: (powerupId: string) => void;
 }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -286,8 +322,13 @@ function PickPanel({
             {pick.offered.map((o, i) => {
               const isPicked = pick.picked === o.id;
               return (
-                <li key={`${o.id}-${i}`} className={`flex items-center gap-2 ${isPicked ? "text-accent font-medium" : ""}`}>
-                  <span className="min-w-[10rem]">{o.id}</span>
+                <li key={`${o.id}-${i}`} className="flex items-center gap-2">
+                  <button
+                    onClick={() => onViewPowerup(o.id)}
+                    className={`min-w-[10rem] text-left hover:underline ${isPicked ? "text-accent font-medium" : "text-text hover:text-accent"}`}
+                  >
+                    {o.id}
+                  </button>
                   <span className="text-muted text-xs">{o.rarity}</span>
                   {isPicked && <span className="ml-auto text-xs uppercase tracking-wide text-accent">picked</span>}
                 </li>
