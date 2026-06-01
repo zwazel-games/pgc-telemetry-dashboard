@@ -20,7 +20,7 @@ describe("DataTable", () => {
     expect(screen.getByText("alpha")).toBeInTheDocument();
   });
 
-  it("sorts by clicked column ascending then descending", () => {
+  it("sorts by clicked column: asc, desc, then resets", () => {
     render(<DataTable columns={cols} rows={rows} getRowKey={(r) => r.name} />);
     fireEvent.click(screen.getByText("N"));
     let cells = screen.getAllByRole("cell").filter((c) => c.getAttribute("data-col") === "n");
@@ -28,6 +28,9 @@ describe("DataTable", () => {
     fireEvent.click(screen.getByText("N"));
     cells = screen.getAllByRole("cell").filter((c) => c.getAttribute("data-col") === "n");
     expect(cells.map((c) => c.textContent)).toEqual(["3", "2", "1"]);
+    fireEvent.click(screen.getByText("N"));
+    cells = screen.getAllByRole("cell").filter((c) => c.getAttribute("data-col") === "n");
+    expect(cells.map((c) => c.textContent)).toEqual(["3", "1", "2"]);
   });
 
   it("fires onRowClick", () => {

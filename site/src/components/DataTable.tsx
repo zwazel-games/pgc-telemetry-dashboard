@@ -1,4 +1,5 @@
 import { useMemo, useState, type ReactNode } from "react";
+import { EmptyState } from "./EmptyState.js";
 
 export type Column<T> = {
   key: string;
@@ -48,7 +49,7 @@ export function DataTable<T>({
     });
   };
 
-  if (rows.length === 0) return <div className="text-muted py-8">{emptyMessage}</div>;
+  if (rows.length === 0) return <EmptyState message={emptyMessage} />;
 
   return (
     <table className="w-full border-collapse text-sm">
