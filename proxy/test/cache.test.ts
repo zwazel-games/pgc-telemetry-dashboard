@@ -17,6 +17,7 @@ describe("cacheJson", () => {
 
     const first = await cacheJson(new Request(url), ctx, handler);
     expect(first.status).toBe(200);
+    expect(await first.json()).toEqual({ data: 1 });
     expect(handler).toHaveBeenCalledOnce();
 
     // Flush waitUntil tasks (cache.put) before the second request
@@ -24,6 +25,7 @@ describe("cacheJson", () => {
 
     const second = await cacheJson(new Request(url), ctx, handler);
     expect(second.status).toBe(200);
+    expect(await second.json()).toEqual({ data: 1 });
     expect(handler).toHaveBeenCalledOnce();
   });
 });
