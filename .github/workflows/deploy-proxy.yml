@@ -1,0 +1,38 @@
+name: Deploy Worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'proxy/**'
+      - 'packages/shared/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/deploy-proxy.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @pgc/proxy typecheck
+      - run: pnpm --filter @pgc/proxy test
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: proxy
+          secrets: |
+            POSTHOG_API_KEY
+        env:
+          POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
