@@ -7,12 +7,20 @@ export type TimeRange = { since?: string; until?: string };
 
 // /matches
 export type Platform = "steam" | "non-steam";
-export type MatchesRequest = TimeRange & { map?: string; version?: string; platform?: Platform };
+/** Server-side filter: only finished, only in-progress, or no filter. Default "true" (finished only). */
+export type FinishedFilter = "true" | "false" | "all";
+export type MatchesRequest = TimeRange & {
+  map?: string;
+  version?: string;
+  platform?: Platform;
+  finished?: FinishedFilter;
+};
 export type Match = {
   match_id: string;
   started_at: string;
   map: string;
   rounds: number;
+  rounds_played: number;
   players: number;
   max_players: number;
   round_duration_s: number;
@@ -25,6 +33,7 @@ export type MatchesResponse = { matches: Match[] };
 export type MatchOverview = {
   map: string;
   rounds: number;
+  rounds_played: number;
   players: number;
   max_players: number;
   round_s: number;

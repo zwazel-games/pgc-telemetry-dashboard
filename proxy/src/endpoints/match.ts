@@ -6,14 +6,29 @@ import { ApiHttpError, jsonResponse, jsonError } from "../errors.js";
 
 const CACHE_S = 60;
 
+// rounds_played comes from the per-player summaries — max round number seen
+// (+1 since rounds are 0-indexed). Joined to the match_started row so the
+// overview is one shot of data.
 const OVERVIEW_SQL = `
-SELECT properties.map_name AS map, properties.total_rounds AS rounds,
-       properties.player_count AS players, properties.max_players AS max_players,
-       properties.round_duration_secs AS round_s, properties.game_version AS version,
-       properties.is_steam AS is_steam
-FROM events
-WHERE event = 'match_started' AND properties.match_id = {match_id}
-LIMIT 1
+SELECT m.map AS map, m.rounds AS rounds, coalesce(rp.rounds_played, 0) AS rounds_played,
+       m.players AS players, m.max_players AS max_players,
+       m.round_s AS round_s, m.version AS version, m.is_steam AS is_steam
+FROM (
+    SELECT properties.map_name AS map, coalesce(properties.total_rounds, 0) AS rounds,
+           properties.player_count AS players, properties.max_players AS max_players,
+           properties.round_duration_secs AS round_s, properties.game_version AS version,
+           properties.is_steam AS is_steam,
+           properties.match_id AS match_id
+    FROM events
+    WHERE event = 'match_started' AND properties.match_id = {match_id}
+    LIMIT 1
+) m
+LEFT JOIN (
+    SELECT properties.match_id AS match_id, max(properties.round) + 1 AS rounds_played
+    FROM events
+    WHERE event = 'player_round_summary' AND properties.match_id = {match_id}
+    GROUP BY match_id
+) rp ON m.match_id = rp.match_id
 `;
 
 const SCOREBOARD_SQL = `

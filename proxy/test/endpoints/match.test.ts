@@ -20,8 +20,8 @@ describe("GET /match", () => {
   it("returns overview + scoreboard + inventories", async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify({
-        results: [["arena_a", 5, 4, 8, 60, "1.0.0", true]],
-        columns: ["map", "rounds", "players", "max_players", "round_s", "version", "is_steam"],
+        results: [["arena_a", 5, 5, 4, 8, 60, "1.0.0", true]],
+        columns: ["map", "rounds", "rounds_played", "players", "max_players", "round_s", "version", "is_steam"],
       })))
       .mockResolvedValueOnce(new Response(JSON.stringify({
         results: [["p1", 10, 4, 200]],

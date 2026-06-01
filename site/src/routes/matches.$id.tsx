@@ -51,7 +51,7 @@ function MatchDetailPage() {
               <Field k="Version">{q.data.data.overview.version}</Field>
               <Field k="Platform">{q.data.data.overview.is_steam ? "Steam" : "Non-Steam"}</Field>
               <Field k="Players">{q.data.data.overview.players}/{q.data.data.overview.max_players}</Field>
-              <Field k="Rounds">{q.data.data.overview.rounds}</Field>
+              <Field k="Rounds">{q.data.data.overview.rounds_played}/{q.data.data.overview.rounds}</Field>
               <Field k="Round length">{formatDuration(q.data.data.overview.round_s)}</Field>
             </dl>
           ) : (

@@ -8,7 +8,7 @@ import { DataTable, type Column } from "../components/DataTable.js";
 import { FilterBar } from "../components/FilterBar.js";
 import { UpdatedAt } from "../components/UpdatedAt.js";
 import { formatDateTime, formatDuration } from "../lib/format.js";
-import type { Match, Platform } from "@pgc/shared";
+import type { FinishedFilter, Match, Platform } from "@pgc/shared";
 
 type Search = {
   preset: "7d" | "30d" | "90d";
@@ -17,6 +17,7 @@ type Search = {
   map?: string;
   version?: string;
   platform?: Platform;
+  finished: FinishedFilter;
 };
 
 function MatchesPage() {
@@ -30,11 +31,12 @@ function MatchesPage() {
   const [localMap, setLocalMap] = useState<string | undefined>(search.map);
   const [localVersion, setLocalVersion] = useState<string | undefined>(search.version);
   const [localPlatform, setLocalPlatform] = useState<Platform | undefined>(search.platform);
+  const [localFinished, setLocalFinished] = useState<FinishedFilter>(search.finished);
   const [localPreset, setLocalPreset] = useState<Search["preset"]>(search.preset);
   const [localSince, setLocalSince] = useState<string | undefined>(search.since);
   const [localUntil, setLocalUntil] = useState<string | undefined>(search.until);
 
-  const matchesQ = useMatches({ since: localSince, until: localUntil, map: localMap, version: localVersion, platform: localPlatform });
+  const matchesQ = useMatches({ since: localSince, until: localUntil, map: localMap, version: localVersion, platform: localPlatform, finished: localFinished });
 
   const columns: Column<Match>[] = [
     { key: "match_id",   label: "Match ID", sortable: true },
@@ -44,7 +46,9 @@ function MatchesPage() {
     { key: "is_steam",   label: "Platform", sortable: true,
       render: (r) => r.is_steam ? "Steam" : "Non-Steam",
       sortValue: (r) => r.is_steam ? "Steam" : "Non-Steam" },
-    { key: "rounds",     label: "Rounds",  sortable: true, align: "right" },
+    { key: "rounds_played", label: "Rounds", sortable: true, align: "right",
+      sortValue: (r) => r.rounds_played,
+      render: (r) => `${r.rounds_played}/${r.rounds}` },
     { key: "players",    label: "Players", sortable: true, align: "right",
       render: (r) => `${r.players}/${r.max_players}` },
     { key: "round_duration_s", label: "Round len", sortable: true, align: "right",
@@ -78,6 +82,11 @@ function MatchesPage() {
         onPlatformChange={(platform) => {
           setLocalPlatform(platform);
           navigate({ search: (prev) => ({ ...prev, platform }) });
+        }}
+        finished={localFinished}
+        onFinishedChange={(finished) => {
+          setLocalFinished(finished);
+          navigate({ search: (prev) => ({ ...prev, finished }) });
         }}
       />
 
@@ -124,6 +133,7 @@ export const Route = createRoute({
       map: typeof raw.map === "string" && raw.map.length > 0 ? raw.map : undefined,
       version: typeof raw.version === "string" && raw.version.length > 0 ? raw.version : undefined,
       platform: raw.platform === "steam" || raw.platform === "non-steam" ? raw.platform : undefined,
+      finished: raw.finished === "false" || raw.finished === "all" ? raw.finished : "true",
     };
   },
 });
