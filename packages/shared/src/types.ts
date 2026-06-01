@@ -6,7 +6,8 @@ export type ApiError = { error: string; field?: string };
 export type TimeRange = { since?: string; until?: string };
 
 // /matches
-export type MatchesRequest = TimeRange & { map?: string; version?: string };
+export type Platform = "steam" | "non-steam";
+export type MatchesRequest = TimeRange & { map?: string; version?: string; platform?: Platform };
 export type Match = {
   match_id: string;
   started_at: string;

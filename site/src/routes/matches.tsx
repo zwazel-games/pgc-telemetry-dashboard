@@ -8,7 +8,7 @@ import { DataTable, type Column } from "../components/DataTable.js";
 import { FilterBar } from "../components/FilterBar.js";
 import { UpdatedAt } from "../components/UpdatedAt.js";
 import { formatDateTime, formatDuration } from "../lib/format.js";
-import type { Match } from "@pgc/shared";
+import type { Match, Platform } from "@pgc/shared";
 
 type Search = {
   preset: "7d" | "30d" | "90d";
@@ -16,6 +16,7 @@ type Search = {
   until?: string;
   map?: string;
   version?: string;
+  platform?: Platform;
 };
 
 function MatchesPage() {
@@ -28,11 +29,12 @@ function MatchesPage() {
   // The URL also gets updated (async) so that query keys change and data refetches.
   const [localMap, setLocalMap] = useState<string | undefined>(search.map);
   const [localVersion, setLocalVersion] = useState<string | undefined>(search.version);
+  const [localPlatform, setLocalPlatform] = useState<Platform | undefined>(search.platform);
   const [localPreset, setLocalPreset] = useState<Search["preset"]>(search.preset);
   const [localSince, setLocalSince] = useState<string | undefined>(search.since);
   const [localUntil, setLocalUntil] = useState<string | undefined>(search.until);
 
-  const matchesQ = useMatches({ since: localSince, until: localUntil, map: localMap, version: localVersion });
+  const matchesQ = useMatches({ since: localSince, until: localUntil, map: localMap, version: localVersion, platform: localPlatform });
 
   const columns: Column<Match>[] = [
     { key: "match_id",   label: "Match ID", sortable: true },
@@ -71,6 +73,11 @@ function MatchesPage() {
         onVersionChange={(version) => {
           setLocalVersion(version);
           navigate({ search: (prev) => ({ ...prev, version }) });
+        }}
+        platform={localPlatform}
+        onPlatformChange={(platform) => {
+          setLocalPlatform(platform);
+          navigate({ search: (prev) => ({ ...prev, platform }) });
         }}
       />
 
@@ -116,6 +123,7 @@ export const Route = createRoute({
       until: typeof raw.until === "string" ? raw.until : def.until,
       map: typeof raw.map === "string" && raw.map.length > 0 ? raw.map : undefined,
       version: typeof raw.version === "string" && raw.version.length > 0 ? raw.version : undefined,
+      platform: raw.platform === "steam" || raw.platform === "non-steam" ? raw.platform : undefined,
     };
   },
 });

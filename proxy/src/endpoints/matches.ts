@@ -32,11 +32,16 @@ export async function handle(req: Request, env: Env, _ctx: ExecutionContext): Pr
     const [maps, versions] = await Promise.all([getMaps(env), getVersions(env)]);
     const map = validateAllowlisted(url.searchParams.get("map") ?? undefined, maps, "map");
     const version = validateAllowlisted(url.searchParams.get("version") ?? undefined, versions, "version");
+    const platform = validateAllowlisted(url.searchParams.get("platform") ?? undefined, ["steam", "non-steam"] as const, "platform");
 
     let sql = BASE;
     const values: Record<string, string | number> = { since, until };
     if (map !== undefined)     { sql += "  AND properties.map_name     = {map}\n";     values.map = map; }
     if (version !== undefined) { sql += "  AND properties.game_version = {version}\n"; values.version = version; }
+    if (platform !== undefined) {
+      sql += "  AND properties.is_steam = {is_steam}\n";
+      values.is_steam = platform === "steam" ? 1 : 0;
+    }
     sql += `ORDER BY started_at DESC LIMIT ${LIMIT}`;
 
     const rows = await runQuery<Match>(env, sql, values);
