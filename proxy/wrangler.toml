@@ -1,0 +1,9 @@
+name = "pgc-telemetry-proxy"
+main = "src/index.ts"
+compatibility_date = "2026-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+ALLOWED_ORIGIN = "http://localhost:5173"
+
+# POSTHOG_API_KEY is set as a secret via GitHub Actions (or `wrangler secret put` locally)
