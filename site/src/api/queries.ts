@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import type {
   MatchesRequest, MatchesResponse,
   MatchDetail,
+  MatchRounds,
   PlayerHistory,
   PowerupPickrate,
   PowerupDetail,
@@ -38,6 +39,14 @@ export const useMatch = (id: string) =>
     queryFn: () => apiEnvelope<MatchDetail>("/match", { id }),
     staleTime: STALE_MS,
     enabled: id.length > 0,
+  });
+
+export const useMatchRounds = (id: string, enabled: boolean) =>
+  useQuery({
+    queryKey: ["match-rounds", id],
+    queryFn: () => apiEnvelope<MatchRounds>("/match-rounds", { id }),
+    staleTime: STALE_MS,
+    enabled: enabled && id.length > 0,
   });
 
 export const usePlayer = (id: string) =>
