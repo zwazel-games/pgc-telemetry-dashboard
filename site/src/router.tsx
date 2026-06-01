@@ -2,6 +2,7 @@ import { createRouter, createRoute } from "@tanstack/react-router";
 import { Route as rootRoute } from "./routes/__root.js";
 import { Route as indexRoute } from "./routes/index.js";
 import { Route as matchesRoute } from "./routes/matches.js";
+import { Route as matchDetailRoute } from "./routes/matches.$id.js";
 
 const placeholder = (path: string, name: string) =>
   createRoute({
@@ -13,7 +14,7 @@ const placeholder = (path: string, name: string) =>
 const routeTree = rootRoute.addChildren([
   indexRoute,
   matchesRoute,
-  placeholder("/matches/$id", "Match detail"),
+  matchDetailRoute,
   placeholder("/players/$id", "Player history"),
   placeholder("/balance/powerups", "Powerup pick-rate"),
 ]);
