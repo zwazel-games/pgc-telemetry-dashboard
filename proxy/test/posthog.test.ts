@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { runQuery } from "../src/posthog.js";
+import { runQuery, UpstreamError } from "../src/posthog.js";
 
 const fakeEnv = { POSTHOG_API_KEY: "phx_test", ALLOWED_ORIGIN: "x" };
 
@@ -32,6 +32,9 @@ describe("runQuery", () => {
 
   it("throws UpstreamError on non-2xx", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("oops", { status: 500 })));
-    await expect(runQuery(fakeEnv, "SELECT 1", {})).rejects.toThrow(/upstream/i);
+    const err = await runQuery(fakeEnv, "SELECT 1", {}).catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(UpstreamError);
+    expect((err as UpstreamError).status).toBe(500);
+    expect((err as Error).message).toMatch(/upstream/i);
   });
 });
