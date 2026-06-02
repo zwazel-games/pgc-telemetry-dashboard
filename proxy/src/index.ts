@@ -3,8 +3,7 @@ import * as matches from "./endpoints/matches.js";
 import * as match from "./endpoints/match.js";
 import * as matchRounds from "./endpoints/match-rounds.js";
 import * as player from "./endpoints/player.js";
-import * as powerup from "./endpoints/powerup.js";
-import * as powerupPickrate from "./endpoints/powerup-pickrate.js";
+import { pickAnalyticsRoutes } from "./endpoints/pick-analytics.js";
 import * as maps from "./endpoints/maps.js";
 import * as versions from "./endpoints/versions.js";
 import { preflight, withCors } from "./cors.js";
@@ -18,8 +17,8 @@ const routes: Record<string, Handler> = {
   "/match": match.handle,
   "/match-rounds": matchRounds.handle,
   "/player": player.handle,
-  "/powerup": powerup.handle,
-  "/powerup-pickrate": powerupPickrate.handle,
+  // /powerup, /powerup-pickrate, /class, /class-pickrate, /weapon, /weapon-pickrate
+  ...pickAnalyticsRoutes,
   "/maps": maps.handle,
   "/versions": versions.handle,
 };

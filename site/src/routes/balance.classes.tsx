@@ -7,13 +7,13 @@ import { validatePickrateSearch } from "../lib/balance.js";
 function Page() {
   const search = Route.useSearch();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const navigate = useNavigate({ from: "/balance/powerups" as any });
-  const q = usePickrate("powerup", { since: search.since, until: search.until });
+  const navigate = useNavigate({ from: "/balance/classes" as any });
+  const q = usePickrate("class", { since: search.since, until: search.until });
   return (
     <PickratePage
-      title="Powerup pick-rate"
-      label="Powerup"
-      detailPath="/balance/powerups/$id"
+      title="Class pick-rate"
+      label="Class"
+      detailPath="/balance/classes/$id"
       preset={search.preset}
       q={q}
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -24,7 +24,7 @@ function Page() {
 
 export const Route = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/balance/powerups",
+  path: "/balance/classes",
   component: Page,
   validateSearch: validatePickrateSearch,
 });

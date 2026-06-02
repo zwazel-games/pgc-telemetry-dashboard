@@ -10,6 +10,10 @@ function Nav() {
         <Link to={"/matches" as any} className="text-muted [&.active]:text-text">Matches</Link>
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <Link to={"/balance/powerups" as any} className="text-muted [&.active]:text-text">Balance · Powerups</Link>
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+        <Link to={"/balance/classes" as any} className="text-muted [&.active]:text-text">Balance · Classes</Link>
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+        <Link to={"/balance/weapons" as any} className="text-muted [&.active]:text-text">Balance · Weapons</Link>
       </nav>
     </header>
   );

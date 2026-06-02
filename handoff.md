@@ -69,14 +69,18 @@ per-install ids), so leaking read access is a real privacy problem.
 
 ## Event schema (source of truth: `docs/telemetry.md` in the game repo)
 Events: `match_started`, `match_ended`, `player_round_summary`, `kill`,
-`death`, `powerup_picked`, `class_selected`, `survey_response`, `crash`.
+`death`, `powerup_picked`, `class_picked`, `weapon_picked`, `survey_response`,
+`crash`. The three `*_picked` events share an identical shape (`offered` array
+of `{id, rarity}`, `picked` id, `player_id`) and are served by one shared
+proxy module — `/powerup`, `/class`, `/weapon` (detail) and
+`/<entity>-pickrate` (list). See `proxy/src/endpoints/pick-analytics.ts`.
 Gotchas the queries must respect:
 - `player_round_summary.kills/deaths/points_awarded` are **per-round deltas** →
   always `sum()` for per-match/per-player totals, never read a single row.
 - `match_started`/`match_ended`/`crash` are **person-less** (`distinct_id` is the
   `match_id`/crash hash, not a player).
-- `powerup_picked.offered` and `class_selected.offered` are **arrays of
-  `{id, rarity}`** → need `arrayJoin(JSONExtractArrayRaw(...))` to unnest.
+- The `*_picked` events' `offered` property is an **array of `{id, rarity}`**
+  → need `arrayJoin(JSONExtractArrayRaw(...))` to unnest.
 - **No win/loss event** → derive placement by ranking players on
   `sum(points_awarded)` within a `match_id`.
 - The player↔match many-to-many is already in the data: every per-player event

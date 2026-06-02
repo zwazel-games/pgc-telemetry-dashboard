@@ -29,6 +29,8 @@ Source of truth documents:
 
 **The Worker is NOT a SQL passthrough.** Every endpoint's HogQL lives as a module-level `const SQL = \`...\`` constant in `proxy/src/endpoints/<name>.ts`. The client never sends SQL — only validated parameters. To add a new endpoint, add a new file under `proxy/src/endpoints/`, hardcode its SQL there, and register it in the `routes` map in `proxy/src/index.ts`.
 
+The one exception is a **structurally-identical endpoint family**: `proxy/src/endpoints/pick-analytics.ts` serves the `*_picked` events (powerup/class/weapon) from shared SQL builders that interpolate only the hardcoded PostHog event name — never user input — so the no-passthrough guarantee still holds. To add a new pick entity, add one `{ path, event }` entry to its `PICK_ENTITIES` table; the `/<entity>` and `/<entity>-pickrate` routes are generated and spread into `index.ts`. Don't hand-copy a new endpoint file for it.
+
 **User-supplied values flow through HogQL `{name}` placeholders only.** Pass them via the `values` object to `runQuery()` in `proxy/src/posthog.ts` — never string-concatenate into SQL. For datetime comparisons, wrap the placeholder: `timestamp >= toDateTime({since})`. String-typed placeholders won't auto-coerce to `DateTime` and the query will fail.
 
 **The 500 error path returns a hardcoded generic message.** Never reflect `UpstreamError.message`, `err.body`, or upstream HTTP bodies to the client. The router in `proxy/src/index.ts` catches everything and returns `{ error: "internal" }`. There is a regression test in `proxy/test/index.test.ts` ("does not leak upstream") that exists to prevent this.
@@ -110,7 +112,7 @@ export async function handle(req: Request, env: Env, _ctx: ExecutionContext): Pr
 }
 ```
 
-Don't refactor this into a shared wrapper — the duplication is intentional, and endpoints diverge as filters/joins grow.
+Don't refactor *divergent* endpoints into a shared wrapper — `/matches`, `/match`, `/player` etc. diverge as filters/joins grow, and the per-file duplication there is intentional. But a **structurally-identical family** (same query shape, differing only by a constant) IS factored: see `pick-analytics.ts`, which builds the powerup/class/weapon pickrate + detail handlers from one set of SQL builders. Use that judgement — copy when endpoints will diverge, share when they're the same query modulo a hardcoded parameter.
 
 ### Validation
 `proxy/src/validate.ts` exports three validators (`validateId`, `validateTimeRange`, `validateAllowlisted`). The `map` and `version` allowlists come from cached `/maps`/`/versions` results via `proxy/src/distincts.ts` — call `getMaps(env)` / `getVersions(env)` to fetch the lists, then pass to `validateAllowlisted`.

@@ -8,14 +8,14 @@ function Page() {
   const { id } = Route.useParams();
   const search = Route.useSearch();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const navigate = useNavigate({ from: "/balance/powerups/$id" as any });
-  const q = usePickDetail("powerup", id, { since: search.since, until: search.until });
+  const navigate = useNavigate({ from: "/balance/weapons/$id" as any });
+  const q = usePickDetail("weapon", id, { since: search.since, until: search.until });
   return (
     <PickDetailPage
       id={id}
-      label="Powerup"
-      listPath="/balance/powerups"
-      detailPath="/balance/powerups/$id"
+      label="Weapon"
+      listPath="/balance/weapons"
+      detailPath="/balance/weapons/$id"
       preset={search.preset}
       view={search.view}
       q={q}
@@ -27,7 +27,7 @@ function Page() {
 
 export const Route = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/balance/powerups/$id",
+  path: "/balance/weapons/$id",
   component: Page,
   validateSearch: validateDetailSearch,
 });

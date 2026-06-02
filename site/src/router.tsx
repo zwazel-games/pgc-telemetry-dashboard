@@ -6,6 +6,10 @@ import { Route as matchDetailRoute } from "./routes/matches.$id.js";
 import { Route as playerRoute } from "./routes/players.$id.js";
 import { Route as powerupsRoute } from "./routes/balance.powerups.js";
 import { Route as powerupDetailRoute } from "./routes/balance.powerups.$id.js";
+import { Route as classesRoute } from "./routes/balance.classes.js";
+import { Route as classDetailRoute } from "./routes/balance.classes.$id.js";
+import { Route as weaponsRoute } from "./routes/balance.weapons.js";
+import { Route as weaponDetailRoute } from "./routes/balance.weapons.$id.js";
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
@@ -14,6 +18,10 @@ const routeTree = rootRoute.addChildren([
   playerRoute,
   powerupsRoute,
   powerupDetailRoute,
+  classesRoute,
+  classDetailRoute,
+  weaponsRoute,
+  weaponDetailRoute,
 ]);
 
 // Hash history: all client-side routing lives after the URL hash (e.g.,

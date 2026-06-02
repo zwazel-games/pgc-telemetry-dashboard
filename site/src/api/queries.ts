@@ -4,8 +4,8 @@ import type {
   MatchDetail,
   MatchRounds,
   PlayerHistory,
-  PowerupPickrate,
-  PowerupDetail,
+  Pickrate,
+  PickDetail,
   MapsResponse, VersionsResponse,
 } from "@pgc/shared";
 import { apiEnvelope } from "./client.js";
@@ -57,17 +57,20 @@ export const usePlayer = (id: string) =>
     enabled: id.length > 0,
   });
 
-export const usePowerupPickrate = (range: { since?: string; until?: string }) =>
+// Pick-analytics family: `entity` is the URL base ("powerup"/"class"/"weapon").
+// One hook pair serves all three; the endpoint paths are /<entity>-pickrate
+// and /<entity>.
+export const usePickrate = (entity: string, range: { since?: string; until?: string }) =>
   useQuery({
-    queryKey: ["powerup-pickrate", range],
-    queryFn: () => apiEnvelope<PowerupPickrate>("/powerup-pickrate", { ...range }),
+    queryKey: ["pickrate", entity, range],
+    queryFn: () => apiEnvelope<Pickrate>(`/${entity}-pickrate`, { ...range }),
     staleTime: STALE_MS,
   });
 
-export const usePowerupDetail = (id: string, range: { since?: string; until?: string }) =>
+export const usePickDetail = (entity: string, id: string, range: { since?: string; until?: string }) =>
   useQuery({
-    queryKey: ["powerup", id, range],
-    queryFn: () => apiEnvelope<PowerupDetail>("/powerup", { id, ...range }),
+    queryKey: ["pick-detail", entity, id, range],
+    queryFn: () => apiEnvelope<PickDetail>(`/${entity}`, { id, ...range }),
     staleTime: STALE_MS,
     enabled: id.length > 0,
   });

@@ -88,39 +88,43 @@ export type PlayerMatchRow = {
 };
 export type PlayerHistory = { matches: PlayerMatchRow[] };
 
-// /powerup-pickrate
-export type PowerupPickrateRow = {
-  powerup: string;
+// Pick-analytics family — shared by the structurally-identical `*_picked`
+// events (powerup / class / weapon). The entity is identified by a neutral
+// `id`; the human label ("Powerup"/"Class"/"Weapon") is a frontend concern.
+
+// /<entity>-pickrate  (e.g. /powerup-pickrate, /class-pickrate)
+export type PickrateRow = {
+  id: string;
   times_offered: number;
   times_picked: number;
   pick_rate: number;
 };
-export type PowerupPickrate = { rows: PowerupPickrateRow[] };
+export type Pickrate = { rows: PickrateRow[] };
 
-// /powerup?id=
-export type PowerupKeyStats = {
-  powerup: string;
+// /<entity>?id=  (e.g. /powerup?id=, /weapon?id=)
+export type PickKeyStats = {
+  id: string;
   rarity: string | null;
   times_offered: number;
   times_picked: number;
   pick_rate: number;
 };
-export type PowerupCoOfferRow = {
-  other_powerup: string;
+export type PickCoOfferRow = {
+  other_id: string;
   co_offered: number;
   times_picked_target: number;
   times_picked_other: number;
 };
-export type PowerupPlayerRow = {
+export type PickPlayerRow = {
   player_id: string;
   times_offered: number;
   times_picked: number;
   pick_rate: number;
 };
-export type PowerupDetail = {
-  stats: PowerupKeyStats;
-  co_offers: PowerupCoOfferRow[];
-  players: PowerupPlayerRow[];
+export type PickDetail = {
+  stats: PickKeyStats;
+  co_offers: PickCoOfferRow[];
+  players: PickPlayerRow[];
 };
 
 // /maps, /versions
