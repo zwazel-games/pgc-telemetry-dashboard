@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createRoute, useNavigate } from "@tanstack/react-router";
 import { Route as rootRoute } from "./__root.js";
 import { useMatches, useMaps, useVersions } from "../api/queries.js";
@@ -39,6 +39,23 @@ function MatchesPage() {
 
   const matchesQ = useMatches({ since: localSince, until: localUntil, map: localMap, version: localVersion, platform: localPlatform, status: localStatus });
 
+  // Default the version filter to the latest version (versions come back
+  // newest-first) once the list loads, unless the URL already pins one. Fires
+  // once per mount; afterwards the user can switch to "All versions" without
+  // it snapping back.
+  const versions = versionsQ.data?.data.versions ?? null;
+  const didDefaultVersion = useRef(false);
+  useEffect(() => {
+    if (didDefaultVersion.current) return;
+    if (search.version !== undefined) { didDefaultVersion.current = true; return; }
+    if (!versions || versions.length === 0) return;
+    const latest = versions[0];
+    if (!latest) return;
+    didDefaultVersion.current = true;
+    setLocalVersion(latest);
+    navigate({ search: (prev) => ({ ...prev, version: latest }) });
+  }, [versions, search.version, navigate]);
+
   const columns: Column<Match>[] = [
     { key: "match_id",   label: "Match ID", sortable: true,
       render: (r) => <span className="text-accent">{r.match_id}</span> },
@@ -77,7 +94,7 @@ function MatchesPage() {
           navigate({ search: (prev) => ({ ...prev, map }) });
         }}
         version={localVersion}
-        versions={versionsQ.data?.data.versions ?? null}
+        versions={versions}
         onVersionChange={(version) => {
           setLocalVersion(version);
           navigate({ search: (prev) => ({ ...prev, version }) });

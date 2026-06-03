@@ -9,7 +9,7 @@ import { Route as matchesRoute } from "../../src/routes/matches.js";
 
 const server = setupServer(
   http.get("http://127.0.0.1:8787/maps",     () => HttpResponse.json({ data: { maps: ["arena_a", "arena_b"] }, generated_at: "t" })),
-  http.get("http://127.0.0.1:8787/versions", () => HttpResponse.json({ data: { versions: ["1.0.0"] }, generated_at: "t" })),
+  http.get("http://127.0.0.1:8787/versions", () => HttpResponse.json({ data: { versions: ["1.2.0", "1.0.0"] }, generated_at: "t" })),
   http.get("http://127.0.0.1:8787/matches",  () => HttpResponse.json({
     data: { matches: [{ match_id: "m1", started_at: "2026-05-01T00:00:00Z", map: "arena_a",
                         rounds: 5, rounds_played: 5, players: 4, max_players: 8, round_duration_s: 60, version: "1.0.0",
@@ -57,5 +57,16 @@ describe("/matches", () => {
   it("defaults the status filter to Finished", async () => {
     renderRoute("/matches");
     await waitFor(() => expect(screen.getByDisplayValue("Finished")).toBeInTheDocument());
+  });
+
+  it("defaults the version filter to the latest version", async () => {
+    renderRoute("/matches");
+    // versions come back newest-first; the latest should be auto-selected.
+    await waitFor(() => expect(screen.getByDisplayValue("1.2.0")).toBeInTheDocument());
+  });
+
+  it("respects an explicit version in the URL over the latest default", async () => {
+    renderRoute("/matches?version=1.0.0");
+    await waitFor(() => expect(screen.getByDisplayValue("1.0.0")).toBeInTheDocument());
   });
 });
