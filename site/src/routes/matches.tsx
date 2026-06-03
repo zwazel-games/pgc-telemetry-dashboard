@@ -6,9 +6,10 @@ import { LoadingState } from "../components/LoadingState.js";
 import { ErrorState } from "../components/ErrorState.js";
 import { DataTable, type Column } from "../components/DataTable.js";
 import { FilterBar } from "../components/FilterBar.js";
+import { MatchStatusBadge } from "../components/MatchStatusBadge.js";
 import { UpdatedAt } from "../components/UpdatedAt.js";
 import { formatDateTime, formatDuration } from "../lib/format.js";
-import type { FinishedFilter, Match, Platform } from "@pgc/shared";
+import type { MatchStatusFilter, Match, Platform } from "@pgc/shared";
 
 type Search = {
   preset: "7d" | "30d" | "90d";
@@ -17,7 +18,7 @@ type Search = {
   map?: string;
   version?: string;
   platform?: Platform;
-  finished: FinishedFilter;
+  status: MatchStatusFilter;
 };
 
 function MatchesPage() {
@@ -31,15 +32,18 @@ function MatchesPage() {
   const [localMap, setLocalMap] = useState<string | undefined>(search.map);
   const [localVersion, setLocalVersion] = useState<string | undefined>(search.version);
   const [localPlatform, setLocalPlatform] = useState<Platform | undefined>(search.platform);
-  const [localFinished, setLocalFinished] = useState<FinishedFilter>(search.finished);
+  const [localStatus, setLocalStatus] = useState<MatchStatusFilter>(search.status);
   const [localPreset, setLocalPreset] = useState<Search["preset"]>(search.preset);
   const [localSince, setLocalSince] = useState<string | undefined>(search.since);
   const [localUntil, setLocalUntil] = useState<string | undefined>(search.until);
 
-  const matchesQ = useMatches({ since: localSince, until: localUntil, map: localMap, version: localVersion, platform: localPlatform, finished: localFinished });
+  const matchesQ = useMatches({ since: localSince, until: localUntil, map: localMap, version: localVersion, platform: localPlatform, status: localStatus });
 
   const columns: Column<Match>[] = [
-    { key: "match_id",   label: "Match ID", sortable: true },
+    { key: "match_id",   label: "Match ID", sortable: true,
+      render: (r) => <span className="text-accent">{r.match_id}</span> },
+    { key: "status",     label: "Status",  sortable: true,
+      render: (r) => <MatchStatusBadge status={r.status} /> },
     { key: "started_at", label: "Started", sortable: true, render: (r) => formatDateTime(r.started_at) },
     { key: "map",        label: "Map",     sortable: true },
     { key: "version",    label: "Version", sortable: true },
@@ -83,10 +87,10 @@ function MatchesPage() {
           setLocalPlatform(platform);
           navigate({ search: (prev) => ({ ...prev, platform }) });
         }}
-        finished={localFinished}
-        onFinishedChange={(finished) => {
-          setLocalFinished(finished);
-          navigate({ search: (prev) => ({ ...prev, finished }) });
+        status={localStatus}
+        onStatusChange={(status) => {
+          setLocalStatus(status);
+          navigate({ search: (prev) => ({ ...prev, status }) });
         }}
       />
 
@@ -133,7 +137,10 @@ export const Route = createRoute({
       map: typeof raw.map === "string" && raw.map.length > 0 ? raw.map : undefined,
       version: typeof raw.version === "string" && raw.version.length > 0 ? raw.version : undefined,
       platform: raw.platform === "steam" || raw.platform === "non-steam" ? raw.platform : undefined,
-      finished: raw.finished === "false" || raw.finished === "all" ? raw.finished : "true",
+      status:
+        raw.status === "in_progress" || raw.status === "aborted" || raw.status === "all"
+          ? raw.status
+          : "finished",
     };
   },
 });

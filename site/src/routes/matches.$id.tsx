@@ -6,6 +6,7 @@ import { LoadingState } from "../components/LoadingState.js";
 import { ErrorState } from "../components/ErrorState.js";
 import { EmptyState } from "../components/EmptyState.js";
 import { DataTable, type Column } from "../components/DataTable.js";
+import { MatchStatusBadge } from "../components/MatchStatusBadge.js";
 import { UpdatedAt } from "../components/UpdatedAt.js";
 import { formatDuration, formatPercent } from "../lib/format.js";
 import type {
@@ -47,6 +48,7 @@ function MatchDetailPage() {
         <>
           {q.data.data.overview ? (
             <dl className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6 text-sm">
+              <Field k="Status"><MatchStatusBadge status={q.data.data.overview.status} /></Field>
               <Field k="Map">{q.data.data.overview.map}</Field>
               <Field k="Version">{q.data.data.overview.version}</Field>
               <Field k="Platform">{q.data.data.overview.is_steam ? "Steam" : "Non-Steam"}</Field>

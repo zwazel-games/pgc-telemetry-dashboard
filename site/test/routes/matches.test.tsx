@@ -13,7 +13,7 @@ const server = setupServer(
   http.get("http://127.0.0.1:8787/matches",  () => HttpResponse.json({
     data: { matches: [{ match_id: "m1", started_at: "2026-05-01T00:00:00Z", map: "arena_a",
                         rounds: 5, rounds_played: 5, players: 4, max_players: 8, round_duration_s: 60, version: "1.0.0",
-                        is_steam: true }] },
+                        is_steam: true, status: "aborted" }] },
     generated_at: "t",
   })),
 );
@@ -47,5 +47,15 @@ describe("/matches", () => {
     await waitFor(() => expect(screen.getByText("All maps")).toBeInTheDocument());
     fireEvent.change(screen.getByDisplayValue("All maps"), { target: { value: "arena_b" } });
     await waitFor(() => expect(screen.getByDisplayValue("arena_b")).toBeInTheDocument());
+  });
+
+  it("renders the match status badge", async () => {
+    renderRoute("/matches");
+    await waitFor(() => expect(screen.getByText("Aborted")).toBeInTheDocument());
+  });
+
+  it("defaults the status filter to Finished", async () => {
+    renderRoute("/matches");
+    await waitFor(() => expect(screen.getByDisplayValue("Finished")).toBeInTheDocument());
   });
 });
