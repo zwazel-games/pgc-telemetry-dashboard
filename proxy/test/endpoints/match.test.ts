@@ -20,8 +20,8 @@ describe("GET /match", () => {
   it("returns overview + scoreboard + inventories", async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify({
-        results: [["arena_a", 5, 5, 4, 8, 60, "1.0.0", true]],
-        columns: ["map", "rounds", "rounds_played", "players", "max_players", "round_s", "version", "is_steam"],
+        results: [["arena_a", 5, 5, 4, 8, 60, "1.0.0", true, "finished"]],
+        columns: ["map", "rounds", "rounds_played", "players", "max_players", "round_s", "version", "is_steam", "status"],
       })))
       .mockResolvedValueOnce(new Response(JSON.stringify({
         results: [["p1", 10, 4, 200]],
@@ -37,12 +37,13 @@ describe("GET /match", () => {
     expect(res.status).toBe(200);
     const json = await res.json() as {
       data: {
-        overview: { map: string } | null;
+        overview: { map: string; status: string } | null;
         scoreboard: { player_id: string }[];
         inventories: { player_id: string; powerups: string[] }[];
       };
     };
     expect(json.data.overview?.map).toBe("arena_a");
+    expect(json.data.overview?.status).toBe("finished");
     expect(json.data.scoreboard[0]?.player_id).toBe("p1");
     expect(json.data.inventories[0]?.powerups).toEqual(["shield", "boost", "magnet"]);
   });

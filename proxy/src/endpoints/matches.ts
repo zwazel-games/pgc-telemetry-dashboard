@@ -4,6 +4,7 @@ import { runQuery } from "../posthog.js";
 import { getMaps, getVersions } from "../distincts.js";
 import { validateTimeRange, validateAllowlisted } from "../validate.js";
 import { ApiHttpError, jsonResponse, jsonError } from "../errors.js";
+import { STATUS_SQL, ENDED_JOIN, statusFilterSql } from "./match-status.js";
 
 const CACHE_S = 60;
 const LIMIT = 500;
@@ -28,10 +29,11 @@ WHERE event = 'match_started'
 `;
 
 // Outer wrap: LEFT JOIN with per-match rounds_played computed from the
-// max player_round_summary.round. coalesce keeps the result a number even
-// when a match has no recorded round summaries (player started then quit).
-// rounds itself is coalesced to 0 to handle older events that didn't carry
-// total_rounds.
+// max player_round_summary.round, plus the match_ended reason (ENDED_JOIN).
+// coalesce keeps the result a number even when a match has no recorded round
+// summaries (player started then quit). rounds itself is coalesced to 0 to
+// handle older events that didn't carry total_rounds. `status` is derived from
+// match_ended.reason with a rounds-played fallback — see match-status.ts.
 const OUTER_HEAD = `
 SELECT
     m.match_id              AS match_id,
@@ -43,7 +45,8 @@ SELECT
     m.max_players           AS max_players,
     m.round_duration_s      AS round_duration_s,
     m.version               AS version,
-    m.is_steam              AS is_steam
+    m.is_steam              AS is_steam,
+    ${STATUS_SQL}           AS status
 FROM (
 `;
 
@@ -55,7 +58,7 @@ LEFT JOIN (
     WHERE event = 'player_round_summary'
     GROUP BY match_id
 ) rp ON m.match_id = rp.match_id
-`;
+${ENDED_JOIN}`;
 
 export async function handle(req: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
   try {
@@ -69,9 +72,14 @@ export async function handle(req: Request, env: Env, _ctx: ExecutionContext): Pr
     const version = validateAllowlisted(url.searchParams.get("version") ?? undefined, versions, "version");
     const platform = validateAllowlisted(url.searchParams.get("platform") ?? undefined, ["steam", "non-steam"] as const, "platform");
     // Default to finished-only so the matches list isn't polluted by the
-    // user's own aborted test sessions. Pass ?finished=false for in-progress
-    // only, or ?finished=all to drop the filter entirely.
-    const finished = validateAllowlisted(url.searchParams.get("finished") ?? "true", ["true", "false", "all"] as const, "finished");
+    // user's own aborted/in-progress test sessions. Pass ?status=in_progress,
+    // ?status=aborted, or ?status=all to widen.
+    const status =
+      validateAllowlisted(
+        url.searchParams.get("status") ?? "finished",
+        ["finished", "in_progress", "aborted", "all"] as const,
+        "status",
+      ) ?? "all";
 
     let inner = INNER_HEAD;
     const values: Record<string, string | number> = { since, until };
@@ -82,16 +90,12 @@ export async function handle(req: Request, env: Env, _ctx: ExecutionContext): Pr
       values.is_steam = platform === "steam" ? 1 : 0;
     }
 
-    // Outer WHERE: applied after the JOIN so we can compare rounds_played
-    // against the (coalesced) total. A match is "finished" iff total_rounds
-    // is known and rounds_played reached it.
+    // Outer WHERE: applied after the JOINs so the status predicate can see
+    // both the rounds heuristic and the match_ended reason. Kept consistent
+    // with STATUS_SQL via statusFilterSql().
     let outerWhere = "WHERE 1=1\n";
-    if (finished === "true") {
-      outerWhere += "  AND coalesce(m.rounds, 0) > 0\n";
-      outerWhere += "  AND coalesce(rp.rounds_played, 0) >= coalesce(m.rounds, 0)\n";
-    } else if (finished === "false") {
-      outerWhere += "  AND (coalesce(m.rounds, 0) <= 0 OR coalesce(rp.rounds_played, 0) < coalesce(m.rounds, 0))\n";
-    }
+    const statusPredicate = statusFilterSql(status);
+    if (statusPredicate !== null) outerWhere += `  AND ${statusPredicate}\n`;
 
     const sql = OUTER_HEAD + inner + OUTER_JOIN + outerWhere + `ORDER BY started_at DESC LIMIT ${LIMIT}`;
 

@@ -7,13 +7,22 @@ export type TimeRange = { since?: string; until?: string };
 
 // /matches
 export type Platform = "steam" | "non-steam";
-/** Server-side filter: only finished, only in-progress, or no filter. Default "true" (finished only). */
-export type FinishedFilter = "true" | "false" | "all";
+/**
+ * Lifecycle of a match, derived from the `match_ended` event's `reason`:
+ * - `finished`    — the match reached its final round (`reason = completed`),
+ *                   or (back-compat for pre-tracking matches with no
+ *                   `match_ended`) every round was played.
+ * - `aborted`     — ended early (`reason in quit_to_menu/app_closed/abandoned`).
+ * - `in_progress` — no `match_ended` recorded and rounds aren't all played.
+ */
+export type MatchStatus = "finished" | "in_progress" | "aborted";
+/** Server-side status filter. "all" drops the filter. Default "finished". */
+export type MatchStatusFilter = MatchStatus | "all";
 export type MatchesRequest = TimeRange & {
   map?: string;
   version?: string;
   platform?: Platform;
-  finished?: FinishedFilter;
+  status?: MatchStatusFilter;
 };
 export type Match = {
   match_id: string;
@@ -26,6 +35,7 @@ export type Match = {
   round_duration_s: number;
   version: string;
   is_steam: boolean;
+  status: MatchStatus;
 };
 export type MatchesResponse = { matches: Match[] };
 
@@ -39,6 +49,7 @@ export type MatchOverview = {
   round_s: number;
   version: string;
   is_steam: boolean;
+  status: MatchStatus;
 };
 export type ScoreboardRow = {
   player_id: string;

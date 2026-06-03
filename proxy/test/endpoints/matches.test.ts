@@ -28,19 +28,28 @@ describe("GET /matches", () => {
     expect(json.field).toBe("map");
   });
 
-  it("returns envelope with matches", async () => {
+  it("rejects status not in allowlist", async () => {
+    stubDistincts();
+    const res = await handle(new Request("https://x.test/matches?status=bogus"), env, ctx);
+    expect(res.status).toBe(400);
+    const json = await res.json() as { error: string; field?: string };
+    expect(json.field).toBe("status");
+  });
+
+  it("returns envelope with matches including status", async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify({ results: [["arena_a"]], columns: ["map_name"] })))
       .mockResolvedValueOnce(new Response(JSON.stringify({ results: [["1.0.0"]], columns: ["game_version"] })))
       .mockResolvedValueOnce(new Response(JSON.stringify({
-        results: [["m1", "2026-05-01T00:00:00Z", "arena_a", 5, 5, 4, 8, 60, "1.0.0", true]],
-        columns: ["match_id", "started_at", "map", "rounds", "rounds_played", "players", "max_players", "round_duration_s", "version", "is_steam"],
+        results: [["m1", "2026-05-01T00:00:00Z", "arena_a", 5, 5, 4, 8, 60, "1.0.0", true, "finished"]],
+        columns: ["match_id", "started_at", "map", "rounds", "rounds_played", "players", "max_players", "round_duration_s", "version", "is_steam", "status"],
       })));
     vi.stubGlobal("fetch", fetchMock);
 
-    const res = await handle(new Request("https://x.test/matches"), env, ctx);
+    const res = await handle(new Request("https://x.test/matches?status=all"), env, ctx);
     expect(res.status).toBe(200);
-    const json = await res.json() as { data: { matches: { match_id: string }[] } };
+    const json = await res.json() as { data: { matches: { match_id: string; status: string }[] } };
     expect(json.data.matches[0]?.match_id).toBe("m1");
+    expect(json.data.matches[0]?.status).toBe("finished");
   });
 });

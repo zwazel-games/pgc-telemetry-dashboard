@@ -3,6 +3,7 @@ import type { Env } from "../env.js";
 import { runQuery } from "../posthog.js";
 import { validateId } from "../validate.js";
 import { ApiHttpError, jsonResponse, jsonError } from "../errors.js";
+import { STATUS_SQL, ENDED_JOIN } from "./match-status.js";
 
 const CACHE_S = 60;
 
@@ -12,7 +13,8 @@ const CACHE_S = 60;
 const OVERVIEW_SQL = `
 SELECT m.map AS map, m.rounds AS rounds, coalesce(rp.rounds_played, 0) AS rounds_played,
        m.players AS players, m.max_players AS max_players,
-       m.round_s AS round_s, m.version AS version, m.is_steam AS is_steam
+       m.round_s AS round_s, m.version AS version, m.is_steam AS is_steam,
+       ${STATUS_SQL} AS status
 FROM (
     SELECT properties.map_name AS map, coalesce(properties.total_rounds, 0) AS rounds,
            properties.player_count AS players, properties.max_players AS max_players,
@@ -29,7 +31,7 @@ LEFT JOIN (
     WHERE event = 'player_round_summary' AND properties.match_id = {match_id}
     GROUP BY match_id
 ) rp ON m.match_id = rp.match_id
-`;
+${ENDED_JOIN}`;
 
 const SCOREBOARD_SQL = `
 SELECT properties.player_id           AS player_id,
