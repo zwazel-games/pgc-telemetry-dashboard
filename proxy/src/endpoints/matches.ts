@@ -53,7 +53,9 @@ FROM (
 const OUTER_JOIN = `
 ) m
 LEFT JOIN (
-    SELECT properties.match_id AS match_id, max(properties.round) + 1 AS rounds_played
+    SELECT properties.match_id AS match_id,
+           max(properties.round) + 1 AS rounds_played,
+           max(timestamp) AS last_round_at
     FROM events
     WHERE event = 'player_round_summary'
     GROUP BY match_id

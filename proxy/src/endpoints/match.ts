@@ -20,13 +20,16 @@ FROM (
            properties.player_count AS players, properties.max_players AS max_players,
            properties.round_duration_secs AS round_s, properties.game_version AS version,
            properties.is_steam AS is_steam,
+           timestamp AS started_at,
            properties.match_id AS match_id
     FROM events
     WHERE event = 'match_started' AND properties.match_id = {match_id}
     LIMIT 1
 ) m
 LEFT JOIN (
-    SELECT properties.match_id AS match_id, max(properties.round) + 1 AS rounds_played
+    SELECT properties.match_id AS match_id,
+           max(properties.round) + 1 AS rounds_played,
+           max(timestamp) AS last_round_at
     FROM events
     WHERE event = 'player_round_summary' AND properties.match_id = {match_id}
     GROUP BY match_id
